@@ -1,0 +1,62 @@
+---
+# Variables
+vars:
+  name: "openvpnaci"
+  location: "eastus"
+
+# Required metadata 
+name: "{{ vars.name }}"
+resource_group: "cdf_example_{{ vars.name }}"
+location: "{{ vars.location }}"
+
+# Provisioner
+provisioner: bicep
+up: "{{ CONFIG_DIR }}/openvpn.bicep"
+
+# Deployment Params
+params:
+    location: "{{ vars.location }}"
+    storageAccountName: "{{ vars.name }}"
+
+hooks:
+    logs:
+      description: "Stream the OpenVPN container logs."
+      ops: 
+      - args: az container attach --ids {{ result.output.ACIID }}
+
+    shell:
+      description: "Get an interactive shell to the OpenVPN container instance"
+      ops:
+      - args: az container exec --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
+
+    start:
+      description: "Start the OpenVPN container instance"
+      lifecycle: ["post-up"]
+      ops:
+      - args: az container exec --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
+
+    stop:
+      description: "Stop the OpenVPN container instance"
+      ops:
+      - args: az container exec --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
+
+    restart:
+      description: "Restart the OpenVPN  container instance"
+      ops:
+      - args: az container restart --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
+
+    download_client:
+      description: "Download the client OpenVPN configuration to ./clients"
+      ops:
+      - args: az container restart --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
+
+    download_server:
+      description: "Download the server OpenVPN configuration to ./server"
+      lifecycle: ["pre-down"]
+      ops:
+      - args: az container restart --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
+
+    upload_server:
+      description: "Upload the server OpenVPN configuration from ./server"
+      ops:
+      - args: az container restart --ids {{ result.output.ACIID }} --exec-command "/bin/sh"

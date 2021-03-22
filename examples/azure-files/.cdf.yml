@@ -1,0 +1,58 @@
+vars:
+  location: "eastus"
+  share: "myfiles"
+  name: "azurefiles"
+  localMountPoint: "{{ env['HOME']}}/{{ vars.name }}"
+
+# Deployment Params
+params:
+    location: "{{ vars.location }}"
+    storageAccountName: "{{ vars.name }}"
+    storageShareName: "{{ vars.share }}"
+
+# Required metadata 
+name: "{{ vars.name }}"
+resource_group: "cdf_example_{{ vars.name }}"
+location: "{{ vars.location }}"
+
+# Provisioner
+provisioner: bicep
+up: "{{ CONFIG_DIR }}/azure-files.bicep"
+
+hooks:
+    print:
+      description: "print"
+      ops:
+      - type: print
+        args: Hello print
+      - type: call
+        args: fmt
+    mount:
+      description: "mount azure files locally"
+      ops: 
+      - type: cmd
+        args: mkdir -p {{ vars.localMountPoint }}
+      - type: cmd
+        args: mount_smbfs -d 777 -f 777 //{{ result.outputs.storageAccountName.value }}:{{ result.outputs.storageAccountKey.value }}==@{{ result.outputs.storageAccountName.value }}.file.core.windows.net/{{vars.share}} {{ vars.localMountPoint }}
+
+    umount:
+      description: "un-mount azure files"
+      ops:
+      - name: cmd
+        args: umount {{ vars.localMountPoint }}
+
+    firewall_on:
+      description: "Deny all and allow only my public IP to access my Azure files"
+      ops:
+      - args: storage account update -g {{ CONFIG_RESOURCE_GROUP }} -n {{ result.outputs.storageAccountName.value }} --default-action Deny
+      - name: myip
+        type: cmd
+        args: curl ifconfig.me
+      - type: print
+        args: my ip = {{ hooks.firewall_on.myip.stdout }} RG = {{ CONFIG_RESOURCE_GROUP }}
+      - args: storage account network-rule add -g {{ CONFIG_RESOURCE_GROUP }} -n {{ result.outputs.storageAccountName.value }} --ip-address {{ hooks.firewall_on.myip.stdout }}
+
+    firewall_off:
+      description: "Allow the WORLD to access my Azure files"
+      ops:
+      - args: storage account update -g {{ CONFIG_RESOURCE_GROUP }} -n {{ result.outputs.storageAccountName.value }} --default-action Allow
