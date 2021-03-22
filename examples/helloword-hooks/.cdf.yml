@@ -1,0 +1,39 @@
+---
+name: "helloworld"
+resource_group: "cdf_example_helloworld_hooks"
+location: "eastus"
+
+params:
+    name : 'cdf_key'
+    location: 'eastus'
+    key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCrs/zJhwDvfjcmXiwlabkZMs7qjA0hl9c3RXBpWYQx2Ps/lhN/I043LsU1zAFPg9P5qaqzVjc73Zky2tZ8qVFKuHAUV8ccwLEwuvWmeqFTK5of6Dt/fuWRbCfpZDcq1nqp+v9bG+OhdNhOUMJFCbFWpHpAP95IOSo9YXeFLdegqMEm8zzgKojYE7RVrrejejmhZcoRMNZj4pxPk/FTqVoTR4C5lzZMBR0XLY/kzq4ay/LfAKyJ+EaNOeFOv/pCIw69DqBDqLiMUwHJLmGkw9azdT6FBXIQhhfeEilItQzfOnzTOh87Xvhv/z0fuhPynUbT6KWX0GO5oTRXE5Xf+TGR'
+
+hooks:
+    recursion:
+      description: "Print recursively till you reach the limit"
+      ops:
+      - type: print
+        args: Hello print demo use for testing recursion
+      - type: call
+        args: print
+
+    pre-up:
+      description: "Print before going up"
+      lifecycle: "pre-up"
+      ops:
+      - type: print
+        args: Hello i am about to provision
+
+    all-up:
+      description: "Print before going up again and also post"
+      lifecycle: ["post-up", "pre-up"]
+      ops:
+      - type: print
+        args: Hello I should run before going up and post going up
+
+    post-up:
+      description: "Print after going up"
+      lifecycle: "post-up"
+      ops:
+      - type: print
+        args: Hello i am provisioned

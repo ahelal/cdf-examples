@@ -20,26 +20,22 @@ provisioner: bicep
 up: "{{ CONFIG_DIR }}/azure-files.bicep"
 
 hooks:
-    print:
-      description: "print"
-      ops:
-      - type: print
-        args: Hello print
-      - type: call
-        args: fmt
     mount:
-      description: "mount azure files locally"
+      description: "mount azure files locally (works only on mac and check your provider if 445 is blocked) "
       ops: 
       - type: cmd
         args: mkdir -p {{ vars.localMountPoint }}
+        platform: ["linux", "darwin"]
       - type: cmd
         args: mount_smbfs -d 777 -f 777 //{{ result.outputs.storageAccountName.value }}:{{ result.outputs.storageAccountKey.value }}==@{{ result.outputs.storageAccountName.value }}.file.core.windows.net/{{vars.share}} {{ vars.localMountPoint }}
+        platform: ["darwin"]
 
     umount:
       description: "un-mount azure files"
       ops:
       - name: cmd
         args: umount {{ vars.localMountPoint }}
+        platform: ["linux", "darwin"]
 
     firewall_on:
       description: "Deny all and allow only my public IP to access my Azure files"
@@ -48,6 +44,7 @@ hooks:
       - name: myip
         type: cmd
         args: curl ifconfig.me
+        platform: ["linux", "darwin"]
       - type: print
         args: my ip = {{ hooks.firewall_on.myip.stdout }} RG = {{ CONFIG_RESOURCE_GROUP }}
       - args: storage account network-rule add -g {{ CONFIG_RESOURCE_GROUP }} -n {{ result.outputs.storageAccountName.value }} --ip-address {{ hooks.firewall_on.myip.stdout }}
