@@ -1,6 +1,6 @@
 
-param publicIpResourceName string
-param publicIpDnsLabel string = '${publicIpResourceName}-${newGuid()}'
+param publicIpName string
+param publicIpDnsLabel string = '${publicIpName}-${newGuid()}'
 param location string = resourceGroup().location
 
 @description('Specifies the Azure tags that will be assigned to the resource.')
@@ -9,7 +9,7 @@ param tags object = {
 }
 
 resource publicIp 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
-  name: publicIpResourceName
+  name: publicIpName
   location: location
   properties: {
     publicIPAllocationMethod: 'Static'
@@ -23,3 +23,4 @@ resource publicIp 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
 // Set an output which can be accessed by the module consumer
 output ipFqdn string = publicIp.properties.dnsSettings.fqdn
 output ip string = publicIp.properties.ipAddress
+output id string = publicIp.id

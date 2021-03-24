@@ -1,7 +1,7 @@
 ---
 # Variables
 vars:
-  name: "openvpnvm"
+  name: "openvpn"
   location: "eastus"
   nsg: "{{vars.name}}-nsg"
 
@@ -12,10 +12,11 @@ location: "{{ vars.location }}"
 
 # Provisioner
 provisioner: bicep
+complete_deployment: true
 
 # Deployment Params
 params:
-    networkSecurityGroupName: "{{ vars.nsg }}"
+    name: "{{ vars.name }}"
     location: "{{ vars.location }}"
     securityRules: 
     - name: 'ssh'

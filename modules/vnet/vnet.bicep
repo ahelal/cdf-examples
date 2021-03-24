@@ -2,6 +2,7 @@
 
 // virtual network name'
 param virtualNetworkName string = 'vnet'
+
 // Resource Name
 param location string = resourceGroup().location
 
@@ -20,15 +21,22 @@ param subnets array = [
   {
     name: 'subnet01'
     prefix: '192.168.0.0/16'
-    endpoints: [
-      {
-        service: 'Microsoft.Storage'
-      }
-    ]
+    endpoints: []
   }
 ]
+// [
+//   {
+//     name: 'subnet01'
+//     prefix: '192.168.0.0/16'
+//     endpoints: [
+//       {
+//         service: 'Microsoft.Storage'
+//       }
+//     ]
+//   }
+// ]
 
-resource vn 'Microsoft.Network/virtualNetworks@2020-06-01' = {
+resource vnet 'Microsoft.Network/virtualNetworks@2020-06-01' = {
   name: virtualNetworkName
   location: location
   tags: tags
@@ -46,5 +54,5 @@ resource vn 'Microsoft.Network/virtualNetworks@2020-06-01' = {
   }
 }
 
-output vnetID string = '${vn.id}'
-output subnetRef array = [for s in subnets: '${vn.id}/subnets/${s.name}']
+output vnetID string = '${vnet.id}'
+output subnetRef array = [for s in subnets: '${vnet.id}/subnets/${s.name}']

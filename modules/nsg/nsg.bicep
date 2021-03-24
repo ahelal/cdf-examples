@@ -8,12 +8,12 @@ param tags object = {
 
 param securityRules array = [
   {
-    name: 'default-allow-rdp'
+    name: 'allow-ssh'
     properties: {
       priority: 1000
       sourceAddressPrefix: '*'
       protocol: 'Tcp'
-      destinationPortRange: '3389'
+      destinationPortRange: '22'
       access: 'Allow'
       direction: 'Inbound'
       sourcePortRange: '*'
