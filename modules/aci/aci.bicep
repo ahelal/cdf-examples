@@ -1,6 +1,5 @@
 param name string
 param image string = 'mcr.microsoft.com/azuredocs/aci-helloworld'
-param port int = 80
 param protocle string = 'TCP'
 param cpuCores int = 1
 param memoryinGb int = 2
@@ -9,6 +8,11 @@ param mountPath string = '/mnt'
 param storageAccountName string = ''
 param storageAccountKey string = ''
 param storageShareName string = ''
+param ports array = [{
+  port: 80
+  protocol: 'TCP'
+}
+]
 
 var filesharevolume = 'filesharevolume'
 
@@ -29,12 +33,7 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2019-12-01'
         name: name
         properties: {
           image: image
-          ports: [
-            {
-              port: port
-              protocol: 'TCP'
-            }
-          ]
+          ports: ports
           resources: {
             requests: {
               cpu: cpuCores
@@ -54,12 +53,7 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2019-12-01'
     restartPolicy: restartPolicy
     ipAddress: {
       type: 'Public'
-      ports: [
-        {
-          port: port
-          protocol: protocle
-        }
-      ]
+      ports: ports
     }
     volumes: [
       {

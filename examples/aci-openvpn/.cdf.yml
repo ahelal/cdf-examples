@@ -24,35 +24,39 @@ hooks:
       ops: 
       - args: az container attach --ids {{ result.output.ACIID }}
 
+    print:
+      ops:
+      - type: print  
+        args: "{{result.outputs.aciid.value }}"
+
     shell:
       description: "Get an interactive shell to the OpenVPN container instance"
       ops:
-      - args: az container exec --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
+      - type: print
+        args: "Run this to get interactive shell\naz container exec --ids {{ result.outputs.aciid.value }} --exec-command /bin/sh"
 
     start:
       description: "Start the OpenVPN container instance"
-      lifecycle: ["post-up"]
       ops:
-      - args: az container exec --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
+      - args: container exec --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
 
     stop:
       description: "Stop the OpenVPN container instance"
       ops:
-      - args: az container exec --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
+      - args: container exec --ids {{ result.output.ACIID }} --exec-command /bin/sh
 
     restart:
       description: "Restart the OpenVPN  container instance"
       ops:
-      - args: az container restart --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
+      - args: container restart --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
 
     download_client:
       description: "Download the client OpenVPN configuration to ./clients"
       ops:
-      - args: az container restart --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
+      - args: container restart --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
 
     download_server:
       description: "Download the server OpenVPN configuration to ./server"
-      lifecycle: ["pre-down"]
       ops:
       - args: az container restart --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
 

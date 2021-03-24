@@ -1,52 +1,32 @@
 // Azure virtual network
 
-param virtualNetworkName string {
-  default: 'vnet'
-  metadata: {
-    description: 'virtual network name'
-  }
+// virtual network name'
+param virtualNetworkName string = 'vnet'
+// Resource Name
+param location string = resourceGroup().location
+
+@description('Specifies the Azure tags that will be assigned to the resource.')
+param tags object = {
+  environment: 'test'
 }
 
-param location string {
-  default: resourceGroup().location
-  metadata: {
-    description: 'Specifies the Azure location where the resource should be created.'
-  }
-}
+@description('Specifies the Azure vnet address where the resource should be created.')
+param addressPrefixes array = [
+  '192.168.0.0/16'
+]
 
-param tags object {
-  default:{
-    environment: 'test'
-  }
-  metadata: {
-    description: 'Specifies the Azure tags that will be assigned to the resource.'
-  }
-}
-
-param addressPrefixes array {
-  default: [ 
-    '192.168.0.0/16' 
-  ]
-  metadata: {
-    description: 'Specifies the Azure vnet address where the resource should be created.'
-  }
-}
-
-param subnets array {
-  default: [ 
+@description('Specifies the Azure vnet address where the resource should be created.')
+param subnets array = [
+  {
+    name: 'subnet01'
+    prefix: '192.168.0.0/16'
+    endpoints: [
       {
-       name: 'subnet01'
-       prefix: '192.168.0.0/16'
-       endpoints: [{
-                    service: 'Microsoft.Storage'
-                  }
-                  ]
+        service: 'Microsoft.Storage'
       }
-  ]
-  metadata: {
-    description: 'Specifies the Azure vnet address where the resource should be created.'
+    ]
   }
-}
+]
 
 resource vn 'Microsoft.Network/virtualNetworks@2020-06-01' = {
   name: virtualNetworkName
@@ -60,7 +40,7 @@ resource vn 'Microsoft.Network/virtualNetworks@2020-06-01' = {
       name: subnet.Name
       properties: {
         addressPrefix: subnet.prefix
-        serviceEndpoints:  subnet.endpoints
+        serviceEndpoints: subnet.endpoints
       }
     }]
   }
