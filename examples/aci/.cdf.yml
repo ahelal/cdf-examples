@@ -36,9 +36,9 @@ hooks:
         args: "Run this to get interactive shell\naz container exec --ids {{ result.outputs.aciid.value }} --exec-command /bin/sh"
 
     start:
-      description: "Start the OpenVPN container instance"
+      description: "Start the OpenVPN VM instance"
       ops:
-      - args: container exec --ids {{ result.output.ACIID }} --exec-command "/bin/sh"
+      - args: vm start -g {{ CONFIG_RESOURCE_GROUP }} -n {{ }}
 
     stop:
       description: "Stop the OpenVPN container instance"

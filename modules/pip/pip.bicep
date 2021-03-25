@@ -20,7 +20,6 @@ resource publicIp 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
   tags: tags
 }
 
-// Set an output which can be accessed by the module consumer
-output ipFqdn string = publicIp.properties.dnsSettings.fqdn
+output fqdn string = publicIp.properties.dnsSettings.fqdn
 output ip string = publicIp.properties.ipAddress
 output id string = publicIp.id

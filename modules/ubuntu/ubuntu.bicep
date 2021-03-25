@@ -39,6 +39,8 @@ param subnetRef string
 // Name of the subnet reference
 param publicIPID string = ''
 
+param customData string = ''
+
 var networkInterfaceName = '${vmName}NetInt'
 var osDiskType = 'Standard_LRS'
 
@@ -114,10 +116,12 @@ resource vm 'Microsoft.Compute/virtualMachines@2020-06-01' = {
       computerName: vmName
       adminUsername: adminUsername
       adminPassword: adminPasswordOrKey
+      customData: base64(customData)
       linuxConfiguration: any(authenticationType == 'password' ? null : linuxConfiguration) // TODO: workaround for https://github.com/Azure/bicep/issues/449
     }
   }
 }
 
-output administratorUsername string = adminUsername
+output vmName string = vmName
+output user string = adminUsername
 // output sshCommand string = 'ssh${adminUsername}@${publicIP.properties.dnsSettings.fqdn}'

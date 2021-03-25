@@ -1,0 +1,105 @@
+---
+# Variables
+vars:
+  name: "openvpn"
+  publicIpDnsLabel: "openvpncdf123" # change me
+  location: "eastus"
+  adminUsername: "ubuntu"
+  clientDir: "{{CONFIG_DIR }}/config"
+  openvpnInstallScript: "{{CONFIG_DIR }}/scripts/install-vpn.sh"
+  privateKeyPath: "{{ vars.clientDir }}/id_rsa"
+  publicKeyPath: "{{ vars.clientDir }}/id_rsa.pub"
+  serverTGZ: "ovpn_server.tar.gz"
+  vmPublicFQDN: "{{ vars.publicIpDnsLabel }}.{{ vars.location }}.cloudapp.azure.com"
+  ssh_command: "ssh -i {{ vars.privateKeyPath }} -o StrictHostKeyChecking=no -o IdentitiesOnly=yes {{vars.adminUsername}}@{{ vars.vmPublicFQDN }}"
+  scp_command: "scp -i {{ vars.privateKeyPath }} -o StrictHostKeyChecking=no -o IdentitiesOnly=yes"
+  
+# Required metadata 
+name: "{{ vars.name }}"
+resource_group: "cdf_example_{{ vars.name }}"
+location: "{{ vars.location }}"
+
+# Provisioner
+provisioner: bicep
+complete_deployment: false
+
+# Deployment Params
+params:
+    name: "{{ vars.name }}"
+    location: "{{ vars.location }}"
+    publicIpDnsLabel: "{{ vars.publicIpDnsLabel }}"
+    authenticationType: "sshPublicKey"
+    adminUsername: "{{ vars.adminUsername }}"
+    adminPasswordOrKey: "{{ include_file(vars.publicKeyPath) }}"
+    customData: "{{ template_file(vars.openvpnInstallScript) }}"
+
+hooks:
+  info:
+    ops:
+    - type: print
+      args: "RG={{ CONFIG_RESOURCE_GROUP }}\nVMNAME={{ result.outputs.vmname.value }}\nFQDN={{vars.vmPublicFQDN }}\nIP={{result.outputs.pip.value}}"
+
+  keygen:
+    description: "Generate ssh keys"
+    lifecycle: ["pre-up"]
+    ops:
+    - type: cmd
+      args: "mkdir -p {{ vars.clientDir }}"
+    - type: cmd 
+      args: rm -f {{ vars.privateKeyPath }} {{ vars.publicKeyPath }}
+    - type: cmd
+      args: ["ssh-keygen", "-t", "rsa", "-f", "{{ vars.privateKeyPath }}", "-q", "-N", ""]
+
+  ssh:
+    description: "ssh into the OpenVPN VM"
+    ops:
+    - args: "{{vars.ssh_command }}"
+      type: cmd
+      interactive: true
+
+  stop:
+    description: "De-allocate the OpenVPN VM instance (to save cost)"
+    ops:
+    - args: vm deallocate -g {{ CONFIG_RESOURCE_GROUP }} -n {{ result.outputs.vmname.value }}
+
+  start:
+    description: "Start the OpenVPN VM instance"
+    ops:
+    - args: vm start -g {{ CONFIG_RESOURCE_GROUP }} -n {{ result.outputs.vmname.value }}
+
+  delete:
+    description: "Delete the OpenVPN VM instance"
+    ops:
+    - args: vm delete -g {{ CONFIG_RESOURCE_GROUP }} -n {{ result.outputs.vmname.value }} -y
+
+  restart_openvpn:
+    description: "Restart the openVPN service"
+    ops:
+    - args: \{{ vars.ssh_command }} sudo systemctl restart openvpn
+      type: cmd
+
+  ovpn:
+    description: "Download the client OpenVPN configuration to ./config"
+    ops:
+    - args: \{{ vars.scp_command }} {{vars.adminUsername}}@{{ vars.vmPublicFQDN }}:client.ovpn {{vars.clientDir}}/client.ovpn
+      type: cmd
+
+  server_download:
+    description: "Download the OpenVPN server configuration to ./config"
+    ops:
+    - type: cmd
+      args: \{{vars.ssh_command }} sudo tar -czf /home/{{vars.adminUsername}}/{{vars.serverTGZ}} /etc/openvpn
+    - type: cmd
+      args: \{{ vars.scp_command }} {{vars.adminUsername}}@{{ vars.vmPublicFQDN }}:{{vars.serverTGZ}} {{vars.clientDir}}/{{vars.serverTGZ}}
+
+  server_upload:
+    description: "Upload the server OpenVPN configuration from ./config"
+    ops:
+    - type: cmd
+      args: \{{ vars.scp_command }} {{vars.clientDir}}/{{vars.serverTGZ}} {{vars.adminUsername}}@{{ vars.vmPublicFQDN }}:{{vars.serverTGZ}}
+    - type: cmd
+      args: \{{vars.ssh_command }} sudo rm -rf /etc/openvpn; sudo tar -xzvf {{vars.serverTGZ}} -C /
+    - type: cmd
+      args: \{{vars.ssh_command }} sudo cp /etc/openvpn/client.ovpn /home/{{ vars.adminUsername }}/client.ovpn
+    - type: call
+      args: restart_openvpn
