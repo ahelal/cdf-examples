@@ -1,0 +1,25 @@
+# Required metadata
+name: "aks{{ store('postfix', random_string(4, 'lower')) }}"
+resource_group: "cdf_example_{{ cdf.name }}"
+location: "northeurope"
+
+vars:
+  a: "b"
+
+# Deployment Params
+params:
+  location: "{{ cdf.location }}"
+  aksName: "{{ cdf.name }}"
+  dnsPrefix: "{{ cdf.name }}"
+
+# Provisioner
+provisioner: bicep
+up: "{{ cdf.config_dir }}/aks.bicep"
+
+hooks:
+  creds:
+    description: "Get AKS creds"
+    ops:
+      - args: aks get-credentials --name {{ cdf.name }} --resource-group {{ cdf.resource_group}} --overwrite-existing
+      - type: print
+        args: "Your ready to use {{ cdf.name }}"

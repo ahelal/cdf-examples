@@ -6,23 +6,23 @@ vars:
 
 # Deployment Params
 params:
-    location: "{{ vars.location }}"
-    storageAccountName: "{{ vars.name }}"
-    storageShareName: "{{ vars.share }}"
+  location: "{{ vars.location }}"
+  storageAccountName: "{{ vars.name }}"
+  storageShareName: "{{ vars.share }}"
 
-# Required metadata 
+# Required metadata
 name: "{{ vars.name }}"
 resource_group: "cdf_example_{{ vars.name }}"
 location: "{{ vars.location }}"
 
 # Provisioner
 provisioner: bicep
-up: "{{ CONFIG_DIR }}/azure-files.bicep"
+up: "{{ cdf.config_dir }}/azure-files.bicep"
 
 hooks:
-    mount:
-      description: "mount azure files locally (works only on mac and check your provider if 445 is blocked) "
-      ops: 
+  mount:
+    description: "mount azure files locally (works only on mac and check your provider if 445 is blocked) "
+    ops:
       - type: cmd
         args: mkdir -p {{ vars.localMountPoint }}
         platform: ["linux", "darwin"]
@@ -30,16 +30,16 @@ hooks:
         args: mount_smbfs -d 777 -f 777 //{{ result.outputs.storageAccountName.value }}:{{ result.outputs.storageAccountKey.value }}==@{{ result.outputs.storageAccountName.value }}.file.core.windows.net/{{vars.share}} {{ vars.localMountPoint }}
         platform: ["darwin"]
 
-    umount:
-      description: "un-mount azure files"
-      ops:
+  umount:
+    description: "un-mount azure files"
+    ops:
       - name: cmd
         args: umount {{ vars.localMountPoint }}
         platform: ["linux", "darwin"]
 
-    firewall_on:
-      description: "Deny all and allow only my public IP to access my Azure files"
-      ops:
+  firewall_on:
+    description: "Deny all and allow only my public IP to access my Azure files"
+    ops:
       - args: storage account update -g {{ CONFIG_RESOURCE_GROUP }} -n {{ result.outputs.storageAccountName.value }} --default-action Deny
       - name: myip
         type: cmd
@@ -49,7 +49,7 @@ hooks:
         args: my ip = {{ hooks.firewall_on.myip.stdout }} RG = {{ CONFIG_RESOURCE_GROUP }}
       - args: storage account network-rule add -g {{ CONFIG_RESOURCE_GROUP }} -n {{ result.outputs.storageAccountName.value }} --ip-address {{ hooks.firewall_on.myip.stdout }}
 
-    firewall_off:
-      description: "Allow the WORLD to access my Azure files"
-      ops:
+  firewall_off:
+    description: "Allow the WORLD to access my Azure files"
+    ops:
       - args: storage account update -g {{ CONFIG_RESOURCE_GROUP }} -n {{ result.outputs.storageAccountName.value }} --default-action Allow
