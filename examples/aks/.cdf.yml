@@ -23,3 +23,10 @@ hooks:
       - args: aks get-credentials --name {{ cdf.name }} --resource-group {{ cdf.resource_group}} --overwrite-existing
       - type: print
         args: "Your ready to use {{ cdf.name }}"
+  attachAcr:
+    description: "Attach ACR"
+    ops:
+      - type: print
+        args: "Running command aks update -n {{ result.outputs.aksName.value }} -g {{ cdf.resource_group}} --attach-acr {{ result.outputs.acrName.value }}"
+      - args: aks update -n {{ result.outputs.aksName.value }} -g {{ cdf.resource_group}} --attach-acr {{ result.outputs.acrName.value }}
+      
