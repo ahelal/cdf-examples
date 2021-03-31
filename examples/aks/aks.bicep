@@ -13,6 +13,12 @@ module vnet '../../modules/vnet/vnet.bicep' = {
 output vnetID string = vnet.outputs.vnetID
 output subnetsRef array = vnet.outputs.subnetRef
 
+module acr '../../modules/acr/acr.bicep' = {
+  name: 'acr'
+}
+
+output acrName string = acr.outputs.acrName
+
 module aks '../../modules/aks/aks.bicep' = {
   name: 'aks'
   params: {
@@ -24,3 +30,5 @@ module aks '../../modules/aks/aks.bicep' = {
     subnetRef: vnet.outputs.subnetRef[0]
   }
 }
+
+output aksName string = aks.outputs.aksName

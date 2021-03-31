@@ -88,3 +88,4 @@ resource aks 'Microsoft.ContainerService/managedClusters@2021-02-01' = {
 
 output id string = aks.id
 output apiServerAddress string = aks.properties.fqdn
+output aksName string = aks.name
