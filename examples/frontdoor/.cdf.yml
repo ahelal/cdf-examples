@@ -9,6 +9,7 @@ vars:
   sku: "S1"
   frontdoorURL: https://{{ cdf.name }}.azurefd.net"
   webAppURL: https://wapp-{{ cdf.name }}.azurewebsites.net"
+
 # Template params
 params:
   frontDoorName: "{{ cdf.name }}"
@@ -27,10 +28,12 @@ hooks:
         cwd: "{{ cdf.config_dir }}/pythonApp"
       - args: webapp up --sku {{vars.sku}} --name wapp-{{ cdf.name }} --resource-group {{cdf.resource_group}}
         cwd: "{{ cdf.config_dir }}/pythonApp"
+
   browseWebApp:
     description: Browse the webapp
     ops:
       - args: webapp browse --name {{ result.outputs.webAppName.value }} --resource-group {{ cdf.resource_group }}
+
   purgeEndpoint:
     description: Purge front-door endpoint
     ops:
@@ -45,3 +48,17 @@ hooks:
         args: while true; do curl -s -o /dev/null -w '%{http_code}\n' {{vars.frontdoorURL}}; done
       - type: print
         args: while true; do curl -s -o /dev/null -w '%{http_code}\n' {{vars.webAppURL}}; done
+
+  disableRule:
+    description: Disable the custom WAF rule
+    ops:
+      - type: print
+        args: Disabling rule
+      - args: network front-door waf-policy rule update -g {{cdf.resource_group}} --policy-name {{cdf.name}} --name limitRule --disabled true
+
+  enableRule:
+    description: Disable the custom WAF rule
+    ops:
+      - type: print
+        args: Enable rule
+      - args: network front-door waf-policy rule update -g {{cdf.resource_group}} --policy-name {{cdf.name}} --name limitRule --disabled false

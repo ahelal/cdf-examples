@@ -15,13 +15,6 @@ param frontDoorWafMode string = 'Prevention'
 @description('Type of Action based on the match filter. Must be Allow, Block or Log.')
 param rateLimitAction string = 'Log'
 
-// "matchVariable": "RequestUri",
-// "selector": null,
-// "operator": "Any",
-// "negateCondition": false,
-// "matchValue": [],
-// "transforms": []
-
 param customRuleLimit object = {
   name: 'limitRule'
   enabledState: 'Enabled'
