@@ -1,0 +1,35 @@
+---
+# Required metadata
+name: "fd{{ store('postfix', random_string(4, 'lower')) }}"
+resource_group: "cdf_example_{{ cdf.name }}"
+location: "northeurope"
+
+# Variables
+vars:
+  sku: "S1"
+
+# Template params
+params:
+  frontDoorName: "{{ cdf.name }}"
+  webAppName: "{{ cdf.name }}"
+  sku: "{{ vars.sku }}"
+
+# Hooks
+hooks:
+  deployWebApp:
+    description: Deploy a simple python app
+    ops:
+      - type: print
+        args: Deploying web app
+      - args: webapp up --sku {{vars.sku}} --name {{ result.outputs.webAppName.value }}
+        cwd: "{{ cdf.config_dir }}/pythonApp"
+  browseWebApp:
+    description: Browse the webapp
+    ops:
+      - args: webapp browse --name {{ result.outputs.webAppName.value }} --resource-group {{ cdf.resource_group }}
+  purgeEndpoint:
+    description: Purge front-door endpoint
+    ops:
+      - type: print
+        args: Purging Endpoint
+      - args: network front-door purge-endpoint --name {{ cdf.name }} --resource-group {{ cdf.resource_group }} --content-paths /

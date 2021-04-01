@@ -13,7 +13,7 @@
 * `Helloworld` simple ssh creation 
 * `Helloworld-hooks` simple ssh creation sample hooks
 * `azure-files` SMB storage
-* `aci-openvpn` OpenVPN on ACI (WIP)
-* `linux-vm`  (TODO)
+* `openvpn` A openVPN Linux vm 
 * `aks` (TODO)
+* `aci` (TODO)
 * `functions` (TODO)
