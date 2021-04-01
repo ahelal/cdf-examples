@@ -1,11 +1,16 @@
 param frontDoorName string
 param backendAddress string
+param wafID string = ''
 
 var frontEndEndpointName = 'frontEndEndpoint'
 var loadBalancingSettingsName = 'loadBalancingSettings'
 var healthProbeSettingsName = 'healthProbeSettings'
 var routingRuleName = 'routingRule'
 var backendPoolName = 'backendPool'
+
+var webApplicationFirewallPolicyLink = {
+  id: wafID
+}
 
 resource frontDoor 'Microsoft.Network/frontDoors@2020-01-01' = {
   name: frontDoorName
@@ -19,6 +24,7 @@ resource frontDoor 'Microsoft.Network/frontDoors@2020-01-01' = {
         properties: {
           hostName: concat(frontDoorName, '.azurefd.net')
           sessionAffinityEnabledState: 'Disabled'
+          webApplicationFirewallPolicyLink: any(wafID == '' ? null : webApplicationFirewallPolicyLink)
         }
       }
     ]

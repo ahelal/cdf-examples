@@ -7,7 +7,8 @@ location: "northeurope"
 # Variables
 vars:
   sku: "S1"
-
+  frontdoorURL: https://{{ cdf.name }}.azurefd.net"
+  webAppURL: https://wapp-{{ cdf.name }}.azurewebsites.net"
 # Template params
 params:
   frontDoorName: "{{ cdf.name }}"
@@ -21,7 +22,10 @@ hooks:
     ops:
       - type: print
         args: Deploying web app
-      - args: webapp up --sku {{vars.sku}} --name {{ result.outputs.webAppName.value }}
+      - type: cmd
+        args: rm -rf .azure
+        cwd: "{{ cdf.config_dir }}/pythonApp"
+      - args: webapp up --sku {{vars.sku}} --name wapp-{{ cdf.name }} --resource-group {{cdf.resource_group}}
         cwd: "{{ cdf.config_dir }}/pythonApp"
   browseWebApp:
     description: Browse the webapp
@@ -33,3 +37,11 @@ hooks:
       - type: print
         args: Purging Endpoint
       - args: network front-door purge-endpoint --name {{ cdf.name }} --resource-group {{ cdf.resource_group }} --content-paths /
+
+  curl:
+    description: Purge front-door endpoint
+    ops:
+      - type: print
+        args: while true; do curl -s -o /dev/null -w '%{http_code}\n' {{vars.frontdoorURL}}; done
+      - type: print
+        args: while true; do curl -s -o /dev/null -w '%{http_code}\n' {{vars.webAppURL}}; done
