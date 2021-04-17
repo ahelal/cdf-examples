@@ -1,6 +1,6 @@
 
 param publicIpName string
-param publicIpDnsLabel string = '${publicIpName}-${newGuid()}'
+param publicIpDnsLabel string = toLower('${publicIpName}-${newGuid()}')
 param location string = resourceGroup().location
 
 @description('Specifies the Azure tags that will be assigned to the resource.')
