@@ -7,7 +7,7 @@ param location string = resourceGroup().location
   'Dynamic'
   'Static'
 ])
-param publicIPAllocationMethod string = 'Dynamic'
+param publicIPAllocationMethod string = 'Static'
 
 @description('Specifies the Azure tags that will be assigned to the resource.')
 param tags object = {
@@ -27,5 +27,5 @@ resource publicIp 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
 }
 
 output fqdn string = publicIp.properties.dnsSettings.fqdn
-output ip string = publicIp.properties.ipAddress
+output ip string =  publicIPAllocationMethod == 'Static' ? publicIp.properties.ipAddress : ''
 output id string = publicIp.id
