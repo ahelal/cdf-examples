@@ -1,6 +1,7 @@
 
 param publicIpName string
-param publicIpDnsLabel string = toLower('${publicIpName}-${newGuid()}')
+param publicIpDnsLabel string = toLower(substring(concat('${publicIpName}', uniqueString(resourceGroup().id)), 0, 15))
+
 param location string = resourceGroup().location
 
 @allowed([

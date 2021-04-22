@@ -28,18 +28,19 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2020-06-01' = {
   tags: tags
   properties: {
     securityRules: [for securityRule in securityRules: {
-      name: '${securityRule.name}'
+      name: securityRule.name
       properties: {
-        priority: '${securityRule.properties.priority}'
-        sourceAddressPrefix: '${securityRule.properties.sourceAddressPrefix}'
-        sourcePortRange: '${securityRule.properties.sourcePortRange}'
-        access: '${securityRule.properties.access}'
-        protocol: '${securityRule.properties.protocol}'
-        destinationPortRange: '${securityRule.properties.destinationPortRange}'
-        direction: '${securityRule.properties.direction}'
-        destinationAddressPrefix: '${securityRule.properties.destinationAddressPrefix}'
+        priority: securityRule.properties.priority
+        sourceAddressPrefix: securityRule.properties.sourceAddressPrefix
+        sourcePortRange: securityRule.properties.sourcePortRange
+        access: securityRule.properties.access
+        protocol: securityRule.properties.protocol
+        destinationPortRange: securityRule.properties.destinationPortRange
+        direction: securityRule.properties.direction
+        destinationAddressPrefix: securityRule.properties.destinationAddressPrefix
       }
     }]
   }
 }
+
 output id string = nsg.id

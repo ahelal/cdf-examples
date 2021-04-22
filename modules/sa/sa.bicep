@@ -19,6 +19,21 @@ param storageTier string = 'Standard'
 @description('Specifies the subnet id to limit traffic from')
 param storageSubnet string = ''
 
+var networkAclsOn = {
+  bypass: 'AzureServices'
+  defaultAction: 'Deny'
+  virtualNetworkRules: [
+    {
+      id: storageSubnet
+      action: 'Allow'
+    }
+  ]
+}
+
+var networkAclsOff = {
+  defaultAction: 'Allow'
+}
+
 @description('Specifies https traffic only to storage service if sets to true')
 param httpsTrafficOnly bool = true
 
@@ -51,21 +66,6 @@ param storageaccountkind string = 'StorageV2'
 @description('Specifies the redundancy of the Azure Storage account.')
 param storgeaccountRedundancy string = 'Standard_LRS'
 
-var networkAclsOn = {
-  bypass: 'AzureServices'
-  defaultAction: 'Deny'
-  virtualNetworkRules: [
-    {
-      id: storageSubnet
-      action: 'Allow'
-    }
-  ]
-}
-
-var networkAclsOff = {
-  defaultAction: 'Allow'
-}
-
 //Create Storage account
 resource sa 'Microsoft.Storage/storageAccounts@2021-01-01' = {
   name: storageaccountName
@@ -87,3 +87,4 @@ resource sa 'Microsoft.Storage/storageAccounts@2021-01-01' = {
 output storageAccountName string = '${storageaccountName}'
 output storageAccountKey  string = listKeys(sa.name, sa.apiVersion).keys[0].value
 output storageAccountUri  string = sa.properties.primaryEndpoints.blob
+output storageAccountId string = sa.id

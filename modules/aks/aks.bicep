@@ -39,7 +39,25 @@ param tags object = {
 }
 
 @description('Specifies the Azure tags that will be assigned to the resource.')
-param kubernetesVersion string = '1.19.7'
+param kubernetesVersion string = '1.20.2'
+
+param enableHttpApplicationRouting bool = true
+
+@allowed([
+  'azure'
+  'kubenet'
+])
+param networkPlugin string = 'azure'
+param maxPods int = 30
+param serviceCidr string = '10.240.0.0/16'
+
+param dnsServiceIP string = '10.240.0.10'
+
+param dockerBridgeCidr string = '172.17.0.1/16'
+
+param enableOmsAgent bool = true
+
+param omsWorkspaceId string = ''
 
 var nodeResourceGroup = 'rg-${dnsPrefix}-${clusterName}'
 
@@ -57,6 +75,17 @@ resource aks 'Microsoft.ContainerService/managedClusters@2021-02-01' = {
     kubernetesVersion: kubernetesVersion
     enableRBAC: true
     dnsPrefix: dnsPrefix
+    addonProfiles:{
+      httpApplicationRouting: {
+        enabled: enableHttpApplicationRouting
+      }
+      omsagent: {
+        enabled: enableOmsAgent
+        config: {
+          logAnalyticsWorkspaceResourceID: omsWorkspaceId
+        }
+      }
+    }
     agentPoolProfiles: [
       {
         name: agentPoolName
@@ -68,6 +97,8 @@ resource aks 'Microsoft.ContainerService/managedClusters@2021-02-01' = {
         osDiskSizeGB: osDiskSizeGB
         enableAutoScaling: enableAutoScaling
         vnetSubnetID: subnetRef
+        //storageProfile: 'ManagedDisks'
+        maxPods: maxPods
         // availabilityZones
       }
     ]
@@ -78,6 +109,10 @@ resource aks 'Microsoft.ContainerService/managedClusters@2021-02-01' = {
     networkProfile: {
       networkPlugin: 'kubenet'
       loadBalancerSku: 'standard'
+      serviceCidr: serviceCidr
+      dnsServiceIP: dnsServiceIP
+      dockerBridgeCidr: dockerBridgeCidr
+
     }
   }
   sku: {
