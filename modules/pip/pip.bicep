@@ -1,4 +1,3 @@
-
 param publicIpName string
 param publicIpDnsLabel string = toLower(substring(concat('${publicIpName}', uniqueString(resourceGroup().id)), 0, 15))
 

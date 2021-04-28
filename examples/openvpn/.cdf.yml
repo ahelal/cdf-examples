@@ -1,9 +1,8 @@
 ---
 # Variables
 vars:
-  name: "openvpn"
   postfix: "{{ store('postfix', random_string(6, 'lower') )}}"
-  publicIpDnsLabel: "{{vars.name}}{{vars.postfix}}"
+  publicIpDnsLabel: "{{cdf.name}}{{vars.postfix}}"
   location: "eastus"
   adminUsername: "ubuntu"
   clientDir: "{{cdf.config_dir }}/config"
@@ -16,9 +15,9 @@ vars:
   scp_command: "scp -i {{ vars.privateKeyPath }} -o StrictHostKeyChecking=no -o IdentitiesOnly=yes"
 
 # Required metadata
-name: "{{ vars.name }}"
-resource_group: "cdf_example_{{ vars.name }}{{vars.postfix}}"
-location: "{{ vars.location }}"
+name: "openvpn"
+resource_group: "cdf_example_openvpn_{{vars.postfix}}"
+location: "eastus"
 
 # Provisioner
 provisioner: bicep
@@ -26,7 +25,7 @@ complete_deployment: false
 
 # Deployment Params
 params:
-  name: "{{ vars.name }}"
+  name: "{{ cdf.name }}"
   location: "{{ vars.location }}"
   publicIpDnsLabel: "{{ vars.publicIpDnsLabel }}"
   authenticationType: "sshPublicKey"
@@ -87,6 +86,8 @@ hooks:
   ovpn:
     description: "Download the client OpenVPN configuration to ./config"
     ops:
+      - args: \{{ vars.scp_command }} {{vars.adminUsername}}@{{ vars.vmPublicFQDN }}:client.ovpn {{vars.clientDir}}/client.ovpn
+        type: print
       - args: \{{ vars.scp_command }} {{vars.adminUsername}}@{{ vars.vmPublicFQDN }}:client.ovpn {{vars.clientDir}}/client.ovpn
         type: cmd
 

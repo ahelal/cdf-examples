@@ -8,7 +8,6 @@ param storagePrefix string = 'prefix'
 @description('Specifies the name of the Azure Storage account.')
 param storageaccountName string = '${storagePrefix}${uniqueString(resourceGroup().id)}'
 
-
 @allowed([
   'Standard'
   'Premium'
@@ -66,6 +65,13 @@ param storageaccountkind string = 'StorageV2'
 @description('Specifies the redundancy of the Azure Storage account.')
 param storgeaccountRedundancy string = 'Standard_LRS'
 
+@description('Specifies the tier.')
+@allowed([
+  'Hot'
+  'Cool'
+])
+param storgeaccountTier string = 'Hot'
+
 //Create Storage account
 resource sa 'Microsoft.Storage/storageAccounts@2021-01-01' = {
   name: storageaccountName
@@ -81,10 +87,11 @@ resource sa 'Microsoft.Storage/storageAccounts@2021-01-01' = {
     supportsHttpsTrafficOnly: httpsTrafficOnly
     isNfsV3Enabled: blobNFS3
     networkAcls: length(storageSubnet) > 1 ? networkAclsOn : networkAclsOff
+    accessTier: storgeaccountTier
   }
 }
 
 output storageAccountName string = '${storageaccountName}'
-output storageAccountKey  string = listKeys(sa.name, sa.apiVersion).keys[0].value
-output storageAccountUri  string = sa.properties.primaryEndpoints.blob
+output storageAccountKey string = listKeys(sa.name, sa.apiVersion).keys[0].value
+output storageAccountUri string = sa.properties.primaryEndpoints.blob
 output storageAccountId string = sa.id

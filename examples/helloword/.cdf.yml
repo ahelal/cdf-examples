@@ -1,6 +1,6 @@
 ---
 name: "helloworld"
-resource_group: "cdf_example_sshkey"
+resource_group: "cdf_helloworld_arm"
 location: "eastus"
 
 params:

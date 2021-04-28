@@ -1,0 +1,7 @@
+---
+name: "helloworld"
+resource_group: "cdf_{{cdf.name}}"
+location: "eastus"
+provisioner: arm
+params:
+    storageName: "{{cdf.name}}{{ store('storagename', random_string(5, 'lower')) }}"

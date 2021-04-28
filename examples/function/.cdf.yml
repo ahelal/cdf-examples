@@ -1,0 +1,15 @@
+# Deployment Params
+vars:
+  # prefix: "{{ random_string(5, option='lower') }}"
+  prefix: "{{ store('postfix', random_string(6, 'lower')) }}"
+params:
+  location: "{{ cdf.location }}"
+  prefix: "{{ vars.prefix }}"
+
+# Required metadata
+name: "func"
+resource_group: "cdf_example_{{ cdf.name }}"
+location: "northeurope"
+
+# Provisioner
+provisioner: bicep

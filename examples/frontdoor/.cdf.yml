@@ -15,7 +15,6 @@ params:
   frontDoorName: "{{ cdf.name }}"
   webAppName: "{{ cdf.name }}"
   sku: "{{ vars.sku }}"
-
 # Hooks
 hooks:
   deployWebApp:
@@ -28,37 +27,36 @@ hooks:
         cwd: "{{ cdf.config_dir }}/pythonApp"
       - args: webapp up --sku {{vars.sku}} --name wapp-{{ cdf.name }} --resource-group {{cdf.resource_group}}
         cwd: "{{ cdf.config_dir }}/pythonApp"
+#   browseWebApp:
+#     description: Browse the webapp
+#     ops:
+#       - args: webapp browse --name {{ result.outputs.webAppName.value }} --resource-group {{ cdf.resource_group }}
 
-  browseWebApp:
-    description: Browse the webapp
-    ops:
-      - args: webapp browse --name {{ result.outputs.webAppName.value }} --resource-group {{ cdf.resource_group }}
+#   purgeEndpoint:
+#     description: Purge front-door endpoint
+#     ops:
+#       - type: print
+#         args: Purging Endpoint
+#       - args: network front-door purge-endpoint --name {{ cdf.name }} --resource-group {{ cdf.resource_group }} --content-paths /
 
-  purgeEndpoint:
-    description: Purge front-door endpoint
-    ops:
-      - type: print
-        args: Purging Endpoint
-      - args: network front-door purge-endpoint --name {{ cdf.name }} --resource-group {{ cdf.resource_group }} --content-paths /
+#   curl:
+#     description: Purge front-door endpoint
+#     ops:
+#       - type: print
+#         args: while true; do curl -s -o /dev/null -w '%{http_code}\n' {{vars.frontdoorURL}}; done
+#       - type: print
+#         args: while true; do curl -s -o /dev/null -w '%{http_code}\n' {{vars.webAppURL}}; done
 
-  curl:
-    description: Purge front-door endpoint
-    ops:
-      - type: print
-        args: while true; do curl -s -o /dev/null -w '%{http_code}\n' {{vars.frontdoorURL}}; done
-      - type: print
-        args: while true; do curl -s -o /dev/null -w '%{http_code}\n' {{vars.webAppURL}}; done
+#   disableRule:
+#     description: Disable the custom WAF rule
+#     ops:
+#       - type: print
+#         args: Disabling rule
+#       - args: network front-door waf-policy rule update -g {{cdf.resource_group}} --policy-name {{cdf.name}} --name limitRule --disabled true
 
-  disableRule:
-    description: Disable the custom WAF rule
-    ops:
-      - type: print
-        args: Disabling rule
-      - args: network front-door waf-policy rule update -g {{cdf.resource_group}} --policy-name {{cdf.name}} --name limitRule --disabled true
-
-  enableRule:
-    description: Disable the custom WAF rule
-    ops:
-      - type: print
-        args: Enable rule
-      - args: network front-door waf-policy rule update -g {{cdf.resource_group}} --policy-name {{cdf.name}} --name limitRule --disabled false
+#   enableRule:
+#     description: Disable the custom WAF rule
+#     ops:
+#       - type: print
+#         args: Enable rule
+#       - args: network front-door waf-policy rule update -g {{cdf.resource_group}} --policy-name {{cdf.name}} --name limitRule --disabled false
