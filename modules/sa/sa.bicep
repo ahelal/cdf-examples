@@ -1,43 +1,23 @@
 //Define Azure Files parmeters
-param location string {
-  default: resourceGroup().location
-  metadata: {
-    description: 'Specifies the Azure location where the resource should be created.'
-  }
-}
+@description('Specifies the Azure location where the resource should be created.')
+param location string = resourceGroup().location
 
-param storagePrefix string {
-  default: 'prefix'
-  metadata: {
-    description: 'Specifies the prefix'
-  }
-}
+@description('Specifies the prefix')
+param storagePrefix string = 'prefix'
 
-param storageaccountName string {
-  // default: [concat('storage', uniqueString(resourceGroup().id))]
-  default: '${storagePrefix}${uniqueString(resourceGroup().id)}'
-  metadata: {
-    description: 'Specifies the name of the Azure Storage account.'
-  }
-}
+@description('Specifies the name of the Azure Storage account.')
+param storageaccountName string = '${storagePrefix}${uniqueString(resourceGroup().id)}'
 
-param storageTier string {
-  default: 'Standard'
-  metadata: {
-    description: 'Specifies the name of the Azure Storage account.'
-    allowed: [
-      'Standard'
-      'Premium'
-    ]
-  }
-}
 
-param storageSubnet string {
-  default: ''
-  metadata: {
-    description: 'Specifies the subnet id to limit traffic from'
-  }
-}
+@allowed([
+  'Standard'
+  'Premium'
+])
+@description('Specifies the name of the Azure Storage account.')
+param storageTier string = 'Standard'
+
+@description('Specifies the subnet id to limit traffic from')
+param storageSubnet string = ''
 
 var networkAclsOn = {
   bypass: 'AzureServices'
@@ -54,57 +34,37 @@ var networkAclsOff = {
   defaultAction: 'Allow'
 }
 
-param httpsTrafficOnly bool {
-  default: true
-  metadata: {
-    description: 'Specifies https traffic only to storage service if sets to true'
-  }
-}
+@description('Specifies https traffic only to storage service if sets to true')
+param httpsTrafficOnly bool = true
 
-param storageHNS bool {
-  default: false
-  metadata: {
-    description: 'Specifies the if HNS is enabled'
-  }
-}
+@description('Specifies the if HNS is enabled')
+param storageHNS bool = false
 
-param blobNFS3 bool {
-  default: false
-  metadata: {
-    description: 'Specifies the if nfs3 is enabled'
-  }
-}
+@description('Specifies the if nfs3 is enabled')
+param blobNFS3 bool = false
 
-param storageaccountkind string {
-  allowed: [
-    'Storage'
-    'StorageV2'
-    'BlobStorage'
-    'FileStorage'
-    'BlockBlobStorage'
-  ]
-  default: 'StorageV2'
-  metadata: {
-    description: 'Specifies the kind of the Azure Storage account.'
-  }
-}
+@allowed([
+  'Storage'
+  'StorageV2'
+  'BlobStorage'
+  'FileStorage'
+  'BlockBlobStorage'
+])
+@description('Specifies the kind of the Azure Storage account.')
+param storageaccountkind string = 'StorageV2'
 
-param storgeaccountRedundancy string {
-  allowed: [
-    'Standard_LRS'
-    'Standard_GRS'
-    'Standard_RAGRS'
-    'Standard_ZRS'
-    'Premium_LRS'
-    'Premium_ZRS'
-    'Standard_GZRS'
-    'Standard_RAGZRS'
-  ]
-  default: 'Standard_LRS'
-  metadata: {
-    description: 'Specifies the redundancy of the Azure Storage account.'
-  }
-}
+@allowed([
+  'Standard_LRS'
+  'Standard_GRS'
+  'Standard_RAGRS'
+  'Standard_ZRS'
+  'Premium_LRS'
+  'Premium_ZRS'
+  'Standard_GZRS'
+  'Standard_RAGZRS'
+])
+@description('Specifies the redundancy of the Azure Storage account.')
+param storgeaccountRedundancy string = 'Standard_LRS'
 
 //Create Storage account
 resource sa 'Microsoft.Storage/storageAccounts@2021-01-01' = {
@@ -125,4 +85,6 @@ resource sa 'Microsoft.Storage/storageAccounts@2021-01-01' = {
 }
 
 output storageAccountName string = '${storageaccountName}'
-output storageAccountKey string =  listKeys(sa.name, sa.apiVersion).keys[0].value
+output storageAccountKey  string = listKeys(sa.name, sa.apiVersion).keys[0].value
+output storageAccountUri  string = sa.properties.primaryEndpoints.blob
+output storageAccountId string = sa.id
