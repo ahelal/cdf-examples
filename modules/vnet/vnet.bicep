@@ -22,7 +22,6 @@ param subnets array = [
     name: 'subnet01'
     prefix: '192.168.0.0/16'
     endpoints: []
-    networkSecurityGroupId: ''
   }
 ]
 

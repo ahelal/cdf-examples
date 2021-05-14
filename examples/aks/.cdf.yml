@@ -29,4 +29,3 @@ hooks:
       - type: print
         args: "Running command aks update -n {{ result.outputs.aksName.value }} -g {{ cdf.resource_group}} --attach-acr {{ result.outputs.acrName.value }}"
       - args: aks update -n {{ result.outputs.aksName.value }} -g {{ cdf.resource_group}} --attach-acr {{ result.outputs.acrName.value }}
-      

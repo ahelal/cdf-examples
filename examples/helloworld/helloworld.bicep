@@ -10,3 +10,4 @@ module sshkeys '../../modules/sshkeys/sshkeys.bicep' = {
     key: key
   }
 }
+output name string = 'test'
